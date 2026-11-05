@@ -11,7 +11,7 @@ $destination = Join-Path $repoRoot 'build/deps/win/vs2022/libssq/src/query.c'
 
 # Hashes are for the exact files already statically inspected.
 $expectedOriginal = '230407C866F2F59720783EAF9F8DFDCE9228BAE5B703A19DD7F84464B225A5D8'
-$expectedReplacement = '59863B0272138699021221BF55B08E21238972D007EC282E7CAAF64AEE98C894'
+$expectedReplacement = '97B0AA8A054971FED0015D2DCF2C9F005885728E32D9C559443B2FCAC87FD404'
 
 foreach ($file in @($replacement, $destination)) {
     if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
