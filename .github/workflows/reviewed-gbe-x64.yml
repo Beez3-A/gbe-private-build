@@ -1,0 +1,15 @@
+name: Reviewed GBE x64 (preflight only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registration:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Registration placeholder
+        run: echo "Select security-hardening to run the reviewed preflight."
