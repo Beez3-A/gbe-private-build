@@ -758,20 +758,21 @@ if _OPTIONS["build-curl"] or _OPTIONS["all-build"] then
 end
 
 if _OPTIONS["build-protobuf"] or _OPTIONS["all-build"] then
-    local proto_common_defs = {
-        "ABSL_PROPAGATE_CXX_STD=ON",
-        "protobuf_BUILD_PROTOBUF_BINARIES=ON",
-        "protobuf_BUILD_PROTOC_BINARIES=ON",
-        "protobuf_BUILD_LIBPROTOC=ON",
-        "protobuf_BUILD_LIBUPB=ON",
-        "protobuf_BUILD_TESTS=OFF",
-        "protobuf_BUILD_EXAMPLES=OFF",
-        "protobuf_DISABLE_RTTI=ON",
-        "protobuf_BUILD_CONFORMANCE=OFF",
-        "protobuf_BUILD_SHARED_LIBS=OFF",
-        "protobuf_WITH_ZLIB=ON",
-        "protobuf_FORCE_FETCH_DEPENDENCIES=ON",
-    }
+local proto_common_defs = {
+    "ABSL_PROPAGATE_CXX_STD=ON",
+    "protobuf_BUILD_PROTOBUF_BINARIES=ON",
+    "protobuf_BUILD_PROTOC_BINARIES=ON",
+    "protobuf_BUILD_LIBPROTOC=ON",
+    "protobuf_BUILD_LIBUPB=ON",
+    "protobuf_BUILD_TESTS=OFF",
+    "protobuf_BUILD_EXAMPLES=OFF",
+    "protobuf_DISABLE_RTTI=ON",
+    "protobuf_BUILD_CONFORMANCE=OFF",
+    "protobuf_BUILD_SHARED_LIBS=OFF",
+    "protobuf_WITH_ZLIB=ON",
+    "protobuf_FORCE_FETCH_DEPENDENCIES=ON",
+    'FETCHCONTENT_SOURCE_DIR_ABSL="' .. path.join(deps_dir, 'abseil') .. '"',
+}
     if os.target() == 'windows' and string.match(_ACTION, 'gmake.*') then
         table.insert(proto_common_defs, 'protobuf_MSVC_STATIC_RUNTIME=ON')
     end
