@@ -1,0 +1,52 @@
+# First phase of the reviewed Goldberg x64 build workflow.
+# This intentionally performs SOURCE PREPARATION ONLY; no DLL compilation.
+# Keep GitHub Actions disabled until the complete workflow has been reviewed.
+name: Reviewed GBE x64 (preflight only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Verify and prepare reviewed source
+    if: github.ref == 'refs/heads/security-hardening'
+    runs-on: windows-2022
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out the reviewed repository
+        uses: actions/checkout@v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Stage verified Windows tools and original source packages
+        shell: pwsh
+        run: '& ./scripts/stage-reviewed-build-tools.ps1'
+
+      - name: Extract reviewed sources and apply libssq patch
+        shell: pwsh
+        run: '& ./scripts/prepare-reviewed-sources.ps1'
+
+      - name: Verify and stage reviewed Abseil source
+        shell: pwsh
+        run: '& ./scripts/stage-reviewed-abseil.ps1'
+
+      - name: Check prepared dependency layout
+        shell: pwsh
+        run: |
+          $root = 'build/deps/win/vs2022'
+          foreach ($item in @(
+            "$root/libssq/src/query.c",
+            "$root/protobuf/CMakeLists.txt",
+            "$root/abseil/CMakeLists.txt",
+            "$root/curl/CMakeLists.txt",
+            "$root/mbedtls/CMakeLists.txt"
+          )) {
+            if (-not (Test-Path -LiteralPath $item -PathType Leaf)) {
+              throw "Missing prepared source: $item"
+            }
+          }
+          Write-Host 'Reviewed source preflight complete. No libraries or DLLs compiled.'
