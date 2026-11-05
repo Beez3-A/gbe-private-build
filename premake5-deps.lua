@@ -733,7 +733,7 @@ if _OPTIONS["build-curl"] or _OPTIONS["all-build"] then
 
     if _OPTIONS["32-build"] then
         cmake_build('curl', "32", merge_list(curl_common_defs, merge_list(wild_zlib_32, {
-            'MBEDTLS_INCLUDE_DIRS="' .. path.join(deps_dir, 'mbedtls', 'install32', 'include') .. '"',
+            'MBEDTLS_INCLUDE_DIR="' .. path.join(deps_dir, 'mbedtls', 'install32', 'include') .. '"',
             'MBEDTLS_LIBRARY="' .. path.join(deps_dir, 'mbedtls', 'install32', 'lib', mbedtls_name) .. '"',
             'MBEDCRYPTO_LIBRARY="' .. path.join(deps_dir, 'mbedtls', 'install32', 'lib', mbedcrypto_name) .. '"',
             'MBEDX509_LIBRARY="' .. path.join(deps_dir, 'mbedtls', 'install32', 'lib', mbedx509_name) .. '"',
@@ -741,7 +741,7 @@ if _OPTIONS["build-curl"] or _OPTIONS["all-build"] then
     end
     if _OPTIONS["64-build"] then
         cmake_build('curl', "64", merge_list(curl_common_defs, merge_list(wild_zlib_64, {
-            'MBEDTLS_INCLUDE_DIRS="' .. path.join(deps_dir, 'mbedtls', 'install64', 'include') .. '"',
+            'MBEDTLS_INCLUDE_DIR="' .. path.join(deps_dir, 'mbedtls', 'install64', 'include') .. '"',
             'MBEDTLS_LIBRARY="' .. path.join(deps_dir, 'mbedtls', 'install64', 'lib', mbedtls_name) .. '"',
             'MBEDCRYPTO_LIBRARY="' .. path.join(deps_dir, 'mbedtls', 'install64', 'lib', mbedcrypto_name) .. '"',
             'MBEDX509_LIBRARY="' .. path.join(deps_dir, 'mbedtls', 'install64', 'lib', mbedx509_name) .. '"',
@@ -749,7 +749,7 @@ if _OPTIONS["build-curl"] or _OPTIONS["all-build"] then
     end
     if _OPTIONS["arm-build"] then
         cmake_build('curl', "arm", merge_list(curl_common_defs, merge_list(wild_zlib_arm, {
-            'MBEDTLS_INCLUDE_DIRS="' .. path.join(deps_dir, 'mbedtls', 'installarm', 'include') .. '"',
+            'MBEDTLS_INCLUDE_DIR="' .. path.join(deps_dir, 'mbedtls', 'installarm', 'include') .. '"',
             'MBEDTLS_LIBRARY="' .. path.join(deps_dir, 'mbedtls', 'installarm', 'lib', mbedtls_name) .. '"',
             'MBEDCRYPTO_LIBRARY="' .. path.join(deps_dir, 'mbedtls', 'installarm', 'lib', mbedcrypto_name) .. '"',
             'MBEDX509_LIBRARY="' .. path.join(deps_dir, 'mbedtls', 'installarm', 'lib', mbedx509_name) .. '"',
