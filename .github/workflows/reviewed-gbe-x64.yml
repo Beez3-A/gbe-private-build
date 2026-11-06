@@ -50,3 +50,7 @@ jobs:
             }
           }
           Write-Host 'Reviewed source preflight complete. No libraries or DLLs compiled.'
+
+      - name: Build reviewed Zlib x64 only
+        shell: pwsh
+        run: '& ./scripts/build-reviewed-zlib-x64.ps1'
