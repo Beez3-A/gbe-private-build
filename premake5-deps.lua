@@ -569,7 +569,9 @@ if _OPTIONS["build-ssq"] or _OPTIONS["all-build"] then
 end
 if _OPTIONS["build-zlib"] or _OPTIONS["all-build"] then
     local zlib_common_defs = {
-        "ZLIB_BUILD_EXAMPLES=OFF",
+        "ZLIB_BUILD_TESTING=OFF",
+        "ZLIB_BUILD_SHARED=OFF",
+        "ZLIB_BUILD_STATIC=ON",
     }
     if _OPTIONS["32-build"] then
         cmake_build('zlib', "32", zlib_common_defs)
