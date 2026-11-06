@@ -42,7 +42,7 @@ foreach ($source in @($sourceCmake, $sourceLibraryCmake)) {
     }
 }
 
-$libraryNames = @('mbedcrypto.lib', 'mbedx509.lib', 'mbedtls.lib')
+$libraryNames = @('mbedcrypto.lib', 'mbedx509.lib', 'mbedtls.lib', 'everest.lib', 'p256m.lib')
 foreach ($name in $libraryNames) {
     if (Test-Path -LiteralPath (Join-Path $libraryDir $name)) {
         throw "Existing Mbed TLS library detected ($name). Refusing to reuse a prior output."
