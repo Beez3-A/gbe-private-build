@@ -151,3 +151,77 @@ jobs:
       - name: Build reviewed Curl x64 only
         shell: pwsh
         run: '& ./scripts/build-reviewed-curl-x64.ps1'
+
+      - name: Inspect reviewed Curl x64 static archive
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $vsRoot = 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC'
+          $toolDir = Get-ChildItem -LiteralPath $vsRoot -Directory |
+            Sort-Object Name -Descending |
+            ForEach-Object { Join-Path $_.FullName 'bin\Hostx64\x64' } |
+            Where-Object {
+              (Test-Path -LiteralPath (Join-Path $_ 'lib.exe')) -and
+              (Test-Path -LiteralPath (Join-Path $_ 'dumpbin.exe'))
+            } |
+            Select-Object -First 1
+
+          if (-not $toolDir) {
+            throw 'Microsoft x64 archive inspection tools not found.'
+          }
+
+          $libExe = Join-Path $toolDir 'lib.exe'
+          $dumpbin = Join-Path $toolDir 'dumpbin.exe'
+
+          $archive = Join-Path $env:GITHUB_WORKSPACE 'build\deps\win\vs2022\curl\install64\lib\libcurl.lib'
+
+          if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
+            throw 'Installed Curl archive missing.'
+          }
+
+          $members = @(& $libExe /LIST $archive 2>&1)
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Curl archive member inspection failed.'
+          }
+
+          $objects = @($members | Where-Object { $_ -match '(?i)\.obj\s*$' })
+          Write-Host "Curl object member count: $($objects.Count)"
+
+          if ($objects.Count -eq 0) {
+            throw 'Curl archive contains no recognized object members.'
+          }
+
+          $headers = @(& $dumpbin /HEADERS $archive 2>&1)
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Curl archive header inspection failed.'
+          }
+
+          $machines = @($headers | Where-Object {
+            $_ -match '^\s*[0-9A-Fa-f]{4}\s+machine\s+\('
+          })
+
+          Write-Host "Object architecture header count: $($machines.Count)"
+
+          if ($machines.Count -eq 0 -or
+              @($machines | Where-Object {
+                $_ -notmatch '^\s*8664\s+machine\s+\(x64\)'
+              }).Count -ne 0) {
+            throw 'Missing or unexpected object architecture.'
+          }
+
+          $symbols = @(& $dumpbin /LINKERMEMBER:2 $archive 2>&1)
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Curl symbol inspection failed.'
+          }
+
+          foreach ($name in @('curl_easy_init', 'curl_easy_perform')) {
+            if (-not @($symbols | Where-Object {
+              $_ -match "\b$([regex]::Escape($name))\b"
+            }).Count) {
+              throw "Expected Curl API symbol not found: $name"
+            }
+            Write-Host "Found Curl API symbol: $name"
+          }
+
+          Write-Host 'Curl x64 static archive inspection passed.'
