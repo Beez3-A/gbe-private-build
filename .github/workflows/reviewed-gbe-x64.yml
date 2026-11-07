@@ -147,3 +147,7 @@ jobs:
           }
 
           Write-Host 'Mbed TLS support archive diagnostics completed.'
+
+      - name: Build reviewed Curl x64 only
+        shell: pwsh
+        run: '& ./scripts/build-reviewed-curl-x64.ps1'
