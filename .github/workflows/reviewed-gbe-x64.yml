@@ -101,3 +101,45 @@ jobs:
           }
 
           Write-Host 'Supporting-library archive inspection passed.'
+
+      - name: Examine Mbed TLS support archive headers and symbols
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $vsRoot = 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC'
+          $dumpbin = Get-ChildItem -LiteralPath $vsRoot -Directory |
+            Sort-Object Name -Descending |
+            ForEach-Object { Join-Path $_.FullName 'bin\Hostx64\x64\dumpbin.exe' } |
+            Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+            Select-Object -First 1
+
+          if (-not $dumpbin) {
+            throw 'Microsoft dumpbin.exe not found.'
+          }
+
+          $outDir = Join-Path $env:GITHUB_WORKSPACE 'build\deps\win\vs2022\mbedtls\install64\lib'
+
+          foreach ($name in @('everest.lib', 'p256m.lib')) {
+            $archive = Join-Path $outDir $name
+
+            if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
+              throw "Missing library: $archive"
+            }
+
+            Write-Host "===== HEADERS: $name ====="
+            & $dumpbin /HEADERS $archive
+
+            if ($LASTEXITCODE -ne 0) {
+              throw "Header inspection failed: $name"
+            }
+
+            Write-Host "===== LINKER SYMBOLS: $name ====="
+            & $dumpbin /LINKERMEMBER:2 $archive
+
+            if ($LASTEXITCODE -ne 0) {
+              throw "Symbol inspection failed: $name"
+            }
+          }
+
+          Write-Host 'Mbed TLS support archive diagnostics completed.'
