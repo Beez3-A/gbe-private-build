@@ -54,3 +54,50 @@ jobs:
       - name: Build reviewed Mbed TLS x64 only
         shell: pwsh
         run: '& ./scripts/build-reviewed-mbedtls-x64.ps1'
+
+      - name: Inspect reviewed Mbed TLS support archives
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $vsRoot = 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC'
+          $libExe = Get-ChildItem -LiteralPath $vsRoot -Directory |
+            Sort-Object Name -Descending |
+            ForEach-Object { Join-Path $_.FullName 'bin\Hostx64\x64\lib.exe' } |
+            Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+            Select-Object -First 1
+
+          if (-not $libExe) {
+            throw 'Microsoft x64 lib.exe not found.'
+          }
+
+          $outDir = Join-Path $env:GITHUB_WORKSPACE 'build\deps\win\vs2022\mbedtls\install64\lib'
+
+          foreach ($name in @('everest.lib', 'p256m.lib')) {
+            $archive = Join-Path $outDir $name
+
+            if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
+              throw "Missing support library: $archive"
+            }
+
+            Write-Host "Inspecting archive: $name"
+
+            $listing = @(& $libExe /LIST $archive 2>&1)
+            $exitCode = $LASTEXITCODE
+
+            $listing | ForEach-Object { Write-Host $_ }
+
+            if ($exitCode -ne 0) {
+              throw "Library inspection failed: $name (exit $exitCode)"
+            }
+
+            $objects = @($listing | Where-Object { $_ -match '(?i)\.obj\s*$' })
+
+            Write-Host "Object member count: $($objects.Count)"
+
+            if ($objects.Count -eq 0) {
+              throw "No compiled object members found in $name"
+            }
+          }
+
+          Write-Host 'Supporting-library archive inspection passed.'
